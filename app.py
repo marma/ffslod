@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask,request,render_template
+from flask import Flask,request,render_template,Response
 from json import loads,dumps,load
 from importlib import import_module
 from yaml import load as yload,FullLoader
@@ -11,6 +11,11 @@ app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 config = yload(open(join(app.root_path, 'config.yml')).read(), Loader=FullLoader)
 extractors = {}
+
+@app.route('/favicon.ico')
+def favicon():
+    return 'NO!',404
+
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
@@ -35,7 +40,7 @@ def catch_all(path):
 
                 #return rdf
 
-    return f'{base}{path}{query_string} -> {url} {rdf}'
+    return Response(rdf.serialize(format="turtle").decode("utf-8"), mimetype='text/turtle') if rdf else ("Not found", 404)
 
 
 

@@ -1,0 +1,29 @@
+---
+base: https://id.example.org/
+
+urls:
+  - match: "person/(?P<id>[0-9]+)"
+    target: "http://www.svenskfilmdatabas.se/sv/item/?type=person&itemid={id}"
+    mode: regexp
+
+    config:
+      type: https://schema.org/Person
+      patterns:
+        - match: "<h1 class=\"page-header__heading\">([^<]+)</h1>"
+          predicate: https://schema.org/name
+
+        - match: "<time class=\"person__born\" datetime=\"([0-9\\-]+)\">"
+          predicate: https://schema.org/birthDate
+
+        - match: "<time datetime=\"([0-9\\-]+)\" class=\"person__death\">"
+          predicate: https://schema.org/deathDate
+
+  - match: "film/(?P<id>[0-9]+)"
+    target: "http://www.svenskfilmdatabas.se/sv/item/?type=film&itemid={id}"
+    mode: regexp
+
+    config:
+      type: https://schema.org/Movie
+      patterns:
+        - match: "<h1 class=\"page-header__heading\">([^<]+)</h1>"
+          predicate: https://schema.org/name
