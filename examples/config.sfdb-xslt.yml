@@ -1,0 +1,12 @@
+---
+base: https://id.svenskfilmdatabas.se/
+
+urls:
+  - match: "person/(?P<id>[0-9]+)"
+    target: "http://www.svenskfilmdatabas.se/sv/item/?type=person&itemid={id}"
+    mode: xslt
+
+    config:
+      type: https://schema.org/Person
+      xslt: sfdb-person
+

@@ -28,6 +28,7 @@ def catch_all(path):
 
     for u in config.get('urls', []):
         m = match(u['match'], path)
+        print(u.get('config', {}))
 
         # find target URL
         if m:

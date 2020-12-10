@@ -6,7 +6,11 @@ def extract(url, uri, config={}):
     g = Graph()
     g.namespace_manager.bind('rdf', URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#'))
     g.namespace_manager.bind('schema', URIRef('https://schema.org/'))
+
     g.add((URIRef(uri), URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), URIRef(config['type'])))
+
+    if url != uri:
+        g.add((URIRef(url), URIRef('https://schema.org/mainEntity'), URIRef(uri)))
 
     # get page
     with Session() as session:

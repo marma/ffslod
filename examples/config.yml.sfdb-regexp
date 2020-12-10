@@ -1,0 +1,41 @@
+---
+base: https://id.svenskfilmdatabas.se/
+
+urls:
+  - match: "person/(?P<id>[0-9]+)"
+    target: "http://www.svenskfilmdatabas.se/sv/item/?type=person&itemid={id}"
+    mode: regexp
+
+    config:
+      type: https://schema.org/Person
+      patterns:
+        - match: "<h1 class=\"page-header__heading\">([^<]+)</h1>"
+          predicate: https://schema.org/name
+
+        - match: "<time class=\"person__born\" datetime=\"([0-9\\-]+)\">"
+          predicate: https://schema.org/birthDate
+
+        - match: "<time datetime=\"([0-9\\-]+)\" class=\"person__death\">"
+          predicate: https://schema.org/deathDate
+
+  - match: "film/(?P<id>[0-9]+)"
+    target: "http://www.svenskfilmdatabas.se/sv/item/?type=film&itemid={id}"
+    mode: regexp
+
+    config:
+      type: https://schema.org/Movie
+      patterns:
+        - match: "<h1 class=\"page-header__heading\">([^<]+)</h1>"
+          predicate: https://schema.org/name
+
+        - match: "<h1 class=\"page-header__heading\">([^<]+)</h1>"
+          predicate: https://schema.org/name
+
+        - match: "<th>Originaltitel</th>\\s*<td><ul class=\"link-list\"><li>([^<]+)</li></ul></td>"
+          predicate: https://schema.org/name
+
+          #        - match: "<th>Regi</th>\\s*<td><ul class=\"link-list\">(<li>(?:<a href=\"[^\"]+\">)?[^<]+</li>)"
+        - match: "<th>Regi</th>\\s*<td><ul class=\"link-list\">(.+)</ul>"
+          predicate: https://schema.org/director
+
+
