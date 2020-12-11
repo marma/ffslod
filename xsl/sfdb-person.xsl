@@ -7,10 +7,14 @@
 	<xsl:param name="uri"/>
 
 	<xsl:template match="/">
-		<rdf:Description>
-			<xsl:attribute name="rdf:about"><xsl:value-of select="$uri"/></xsl:attribute>
-			<xsl:apply-templates/>
-		</rdf:Description>
+		<rdf:RDF>
+            <rdf:Description rdf:about="{$uri}">
+                <xsl:apply-templates select="html/body/main/header/div[@class='page-header__info']"/>
+			    <xsl:apply-templates select="//h2[@id='biography']"/>
+            </rdf:Description>
+
+            <xsl:apply-templates select="//h2[@id='films']"/>
+		</rdf:RDF>
 	</xsl:template>
 
 	<xsl:template match="html/body/main/header/div[@class='page-header__info']">
@@ -28,6 +32,59 @@
 		</xsl:for-each>
 	</xsl:template>
 
-	<!--xsl:template match="ul[@class='link-list']a-->
+    <xsl:template match="h2[@id='biography']">
+        <schema:description>
+            <xsl:for-each select="following-sibling::div[1]/div/p">
+                <xsl:choose>
+                    <xsl:when test="position()!=last()">
+                        <xsl:value-of select="concat(., ' ')"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="."/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:for-each>
+        </schema:description>
+    </xsl:template>
+
+    <xsl:template match="h2[@id='films']">
+        <xsl:for-each select="following-sibling::div[1]/div/table/tbody/tr">
+            <xsl:variable name="type" select="th"/>
+            <xsl:for-each select="td/ul/li">
+                <xsl:choose>
+                    <xsl:when test="$type='Regi'">
+                        <rdf:Description rdf:about="REMAP{a/@href}">
+                            <schema:name><xsl:value-of select="a"/></schema:name>
+                            <schema:director resource="{$uri}"/>
+                        </rdf:Description>
+                    </xsl:when>
+                    <xsl:when test="$type='Manus'">
+                        <rdf:Description rdf:about="REMAP{a/@href}">
+                            <schema:name><xsl:value-of select="a"/></schema:name>
+                            <schema:creator resource="{$uri}"/>
+                        </rdf:Description>
+                    </xsl:when>
+                    <xsl:when test="$type='Producent'">
+                        <rdf:Description rdf:about="REMAP{a/@href}">
+                            <schema:name><xsl:value-of select="a"/></schema:name>
+                            <schema:producer resource="{$uri}"/>
+                        </rdf:Description>
+                    </xsl:when>
+                    <xsl:when test="$type='Klippning'">
+                        <rdf:Description rdf:about="REMAP{a/@href}">
+                            <schema:name><xsl:value-of select="a"/></schema:name>
+                            <schema:editor resource="{$uri}"/>
+                        </rdf:Description>
+                    </xsl:when>
+                    <xsl:when test="$type='Roll'">
+                        <rdf:Description rdf:about="REMAP{a/@href}">
+                            <schema:name><xsl:value-of select="a"/></schema:name>
+                            <schema:actor resource="{$uri}"/>
+                        </rdf:Description>
+                    </xsl:when>
+                </xsl:choose> 
+            </xsl:for-each>
+        </xsl:for-each>
+    </xsl:template>
 </xsl:stylesheet>
 
