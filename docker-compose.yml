@@ -8,6 +8,7 @@ services:
             - 5000
         volumes:
             - .:/app:ro
+            - data-volume:/data
         command: /usr/local/bin/gunicorn -k gevent --reload --workers 5 --worker-connections 10 --access-logfile=- --pythonpath /app -b :5000 app:app
 
     front:
@@ -19,4 +20,5 @@ services:
             - ./static:/www/static:ro
             - ./etc/nginx.conf:/etc/nginx/conf.d/default.conf
 
-
+volumes:
+    data-volume:

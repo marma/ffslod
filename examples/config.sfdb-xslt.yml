@@ -1,6 +1,12 @@
 ---
 base: https://id.svenskfilmdatabas.se/
 
+cache: true
+
+store: /data/rdfstore
+
+sparql: true
+
 urls:
   - match: "person/(?P<id>[0-9]+)"
     target: "http://www.svenskfilmdatabas.se/sv/item/?type=person&itemid={id}"
@@ -9,4 +15,12 @@ urls:
     config:
       type: https://schema.org/Person
       xslt: sfdb-person
+
+  - match: "movie/(?P<id>[0-9]+)"
+    target: "http://www.svenskfilmdatabas.se/sv/item/?type=film&itemid={id}"
+    mode: xslt
+
+    config:
+      type: https://schema.org/Movie
+      xslt: sfdb-movie
 
