@@ -3,7 +3,7 @@ from rdflib import Graph,URIRef,Literal
 from lxml import etree,html
 from os.path import realpath,dirname,join
 
-def extract(url, uri, config={}):
+def extract(url, uri, config={}, base=''):
     # get page
     with Session() as session:
         r = session.get(url)
@@ -17,7 +17,11 @@ def extract(url, uri, config={}):
         d = join(dirname(realpath(__file__)), '..', 'xsl')
         with open(join(d, f'{config["xslt"]}.xsl'), mode='rb') as f:
             t = etree.XSLT(etree.parse(f))
-            result = str(t(dom, uri=etree.XSLT.strparam(uri), url=etree.XSLT.strparam(url)))
+            result = str(
+                        t(dom,
+                          uri=etree.XSLT.strparam(uri),
+                          url=etree.XSLT.strparam(url),
+                          base=etree.XSLT.strparam(base)))
 
             g = Graph(identifier=uri).parse(data=result)
 

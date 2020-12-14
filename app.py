@@ -16,15 +16,15 @@ extractors = {}
 cache = config.get('cache', False)
 
 @app.route('/', defaults={ 'path': '' })
-@app.route('/<path:path>')
-def catch_all(path):
-    base = config.get('base', '')
+@app.route('/<path:path>.ttl')
+def turtle(path):
     path = f'{path}'
     host = request.headers.get('Host')
+    base = config.get('base', 'http://' + host + '/')
     query_string = ('?' + '&'.join([ key + '=' + value for key,value in request.args.items() ])) if request.args else ''
     uri, url,rdf = f'{base}{path}',None,None
 
-    if cache and not request.args.get('_reindex', False):
+    if cache and not '_reindex' in request.args:
         with closing(get_store()) as store:
             ctx = store.get_context(uri)
             
@@ -41,7 +41,7 @@ def catch_all(path):
             # extract RDF
             if url:
                 extractor = get_extractor(u.get('mode', 'rdfa'))
-                rdf = extractor(url, uri, config=u.get('config', {}))
+                rdf = extractor(url, uri, config=u.get('config', {}), base=base)
                 break
 
     if rdf:
@@ -59,7 +59,16 @@ def index():
 
 @app.route('/_sparql')
 def sparql():
-    return render_template('sparql.html')
+    result = None    
+    query = request.args.get('query', None)    
+
+    if query:
+        with closing(get_store()) as store:
+            result = store.query(query)
+            
+            return render_template('sparql.html', result=result)
+
+    return render_template('sparql.html', result=None)
 
 
 @app.route('/favicon.ico')

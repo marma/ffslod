@@ -1,8 +1,39 @@
+<!DOCTYPE html>
 <html>
     <head>
         <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     </head>
     <body>
-        <p>Hello Template!</p>
+        <p>Hello SPARQL</p>
+        <form method="GET">
+            <textarea cols="80" rows="15" name="query">{{ request.args.get('query', 'SELECT * WHERE {\n  ?uri a <https://schema.org/Movie> .\n  ?uri <https://schema.org/name> ?name .\n}\n\nLIMIT 100') }}</textarea>
+            <input type="submit"/>
+        </form>
+        {% if result %}
+        <table>
+            <thead>
+                <tr>
+                {% for v in result.vars %}
+                    <td>{{ v }}</td>
+                {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for row in result %}
+                <tr>
+                {% for value in row %}
+                    <td>
+                        {% if value.startswith('http') %}
+                            <a href="{{ value }}">{{ value }}</a>
+                        {% else %}
+                            {{ value }}
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
     </body>
 </html>

@@ -1,6 +1,7 @@
 <?xml version="1.0"?> 
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:schema="https://schema.org/">
     <xsl:param name="uri"/>
+    <xsl:param name="base">https://id.svenskfilmdatabas.se</xsl:param>
 
     <xsl:template match="/">
 		<rdf:RDF>
@@ -53,6 +54,7 @@
                             <xsl:with-param name="url" select="a/@href"/>
                         </xsl:call-template>
                     </xsl:attribute>
+                    <rdf:type resource="https://schema.org/Movie"/>
                     <schema:name><xsl:value-of select="a"/></schema:name>
                     <xsl:choose>
                         <xsl:when test="$type='Regi'">
@@ -83,10 +85,10 @@
         <xsl:param name="url"/>
         <xsl:choose>
             <xsl:when test="contains($url, 'type=person')">
-                <xsl:value-of select="concat('https://id.svenskfilmdatabas.se/person/', substring-after($url, 'itemid='))"/>
+                <xsl:value-of select="concat($base, 'person/', substring-after($url, 'itemid='))"/>
             </xsl:when>
             <xsl:when test="contains($url, 'type=film')">
-                <xsl:value-of select="concat('https://id.svenskfilmdatabas.se/movie/', substring-after($url, 'itemid='))"/>
+                <xsl:value-of select="concat($base, 'movie/', substring-after($url, 'itemid='))"/>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:value-of select="$url"/>
