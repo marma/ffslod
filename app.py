@@ -149,7 +149,7 @@ def frame_hack(j, uri):
     ret = { '@context': j['@context'] }
     main = next((x for x in j['@graph'] if x['@id'] == uri), None)
     ret.update(main)
-    ret['@includes'] = [ x for x in j['@graph'] if x['@id'] != uri ]
+    ret['http://purl.org/dc/terms/relation'] = [ x for x in j['@graph'] if x['@id'] != uri ]
 
     return ret
 
