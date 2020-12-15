@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-    </head>
-    <body>
-        <p>Hello SPARQL</p>
+{% extends "base.html" %}
+{% block content %}
+    
+        <h1 class="ui header">SPARQL Form</h1>
         <form method="GET">
             <textarea cols="80" rows="15" name="query">{{ request.args.get('query', 'SELECT * WHERE {\n  ?uri a <https://schema.org/Movie> .\n  ?uri <https://schema.org/name> ?name .\n}\n\nLIMIT 100') }}</textarea>
             <input type="submit"/>
@@ -35,5 +32,4 @@
             </tbody>
         </table>
         {% endif %}
-    </body>
-</html>
+{% endblock %}

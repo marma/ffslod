@@ -23,6 +23,8 @@ def extract(url, uri, config={}, base=''):
                           url=etree.XSLT.strparam(url),
                           base=etree.XSLT.strparam(base)))
 
+            print(result)
+
             g = Graph(identifier=uri).parse(data=result)
 
             if len(g) > 0:
