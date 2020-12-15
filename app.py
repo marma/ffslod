@@ -24,12 +24,42 @@ def turtle(path):
     query_string = ('?' + '&'.join([ key + '=' + value for key,value in request.args.items() ])) if request.args else ''
     uri, url,rdf = f'{base}{path}',None,None
 
+    rdf = get_resource(uri, url
+
+    return Response(rdf.serialize(format="turtle").decode("utf-8"), mimetype='text/turtle') if rdf else ("Not found", 404)
+    
+
+@app.route('/')
+def index():
+    host = request.headers.get('Host')
+    base  = config.get('base', 'http://' + host + '/')
+    title = config.get('title', base)
+
+    return render_template('index.html', host=host, base=base, title=title)
+
+
+@app.route('/_sparql')
+def sparql():
+    result = None    
+    query = request.args.get('query', None)    
+
+    if query:
+        with closing(get_store()) as store:
+            result = store.query(query)
+            
+            return render_template('sparql.html', result=result)
+
+    return render_template('sparql.html', result=None)
+
+
+
+def get_resource(uri, use_cache=True):
     if cache and not '_reindex' in request.args:
         with closing(get_store()) as store:
             ctx = store.get_context(uri)
             
             if ctx:
-                return Response(ctx.serialize(format="turtle").decode("utf-8"), mimetype='text/turtle')
+                return ctx #Response(ctx.serialize(format="turtle").decode("utf-8"), mimetype='text/turtle')
 
     for u in config.get('urls', []):
         m = match(u['match'], path)
@@ -49,26 +79,7 @@ def turtle(path):
             for t in rdf:
                 store.add((t[0], t[1], t[2], uri))
 
-    return Response(rdf.serialize(format="turtle").decode("utf-8"), mimetype='text/turtle') if rdf else ("Not found", 404)
-
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-
-@app.route('/_sparql')
-def sparql():
-    result = None    
-    query = request.args.get('query', None)    
-
-    if query:
-        with closing(get_store()) as store:
-            result = store.query(query)
-            
-            return render_template('sparql.html', result=result)
-
-    return render_template('sparql.html', result=None)
+    return rdf
 
 
 @app.route('/favicon.ico')
