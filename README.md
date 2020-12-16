@@ -11,6 +11,6 @@ Since organisations have different varying level of control over their sites FFS
 ![alt text](https://raw.githubusercontent.com/marma/ffslod/main/etc/FFSLOD.png "Modes of operation")
 
 ## Installation
-First get the source by running `git clone https://github.com/marma/ffslod`. Then copy one of the example configuration files in `examples/` to `config.yml` in the root directory and run `docker-compose up`. That should get you up and running. Next take a look at the files in `xsl/` if you want to do see examples of transformations from HTML to RDF.
+First get the source by running `git clone https://github.com/marma/ffslod`. Then copy one of the example configuration files in `examples/` to `config.yml` in the root directory and run `docker-compose up`. That should get you up and running with a server at http://localhost:8080/. Next take a look at the files in `xsl/` if you want to do see examples of transformations from HTML to RDF.
 
 ## Configuration
