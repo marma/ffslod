@@ -1,8 +1,35 @@
-{% extends "base.html" %}
-{% block content %}
-            <h1 class="ui header">Resource</h1>
-            <p>This is a basic fixed menu template using fixed size containers.</p>
-            <p>A text container is used for the main container, which is useful for single column layouts</p>
-
-{% endblock %}
+# extends "base.html"
+# block content
+            <h1 class="ui header">{{ rdf['name'] }}</h1>
+            <table class="ui table">
+                # for key in rdf:
+                #   if key not in [ 'relation', '@context' ]
+                <tr>
+                    <td valign="top"><b>{{ key }}</b></td>
+                    <td>
+                    # if rdf[key] is mapping:
+                    <a href="{{ rdf[key]['@id'] }}">{{ related_map[rdf[key]['@id']].get('name', 'Unknown') }}</a>
+                    # elif rdf[key] is string:
+                        {{ rdf[key] }}
+                    # elif rdf[key] is iterable:
+                        <ul>
+                        #   for x in rdf[key]:
+                        <li>
+                        #     if x is mapping:
+                            <a href="{{ x['@id'] }}">{{ related_map[x['@id']].get('name', 'Unknown') }}</a>
+                        #     else:
+                            {{ x }}
+                        #     endif
+                        </li>
+                        #   endfor
+                        </ul>
+                    # else:
+                        <td></td>
+                    # endif
+                    </td>
+                </tr>
+                #   endif
+                # endfor
+            </table>
+# endblock
 

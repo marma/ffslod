@@ -1,35 +1,39 @@
-{% extends "base.html" %}
-{% block content %}
-    
+# extends "base.html"
+# block content
         <h1 class="ui header">SPARQL Form</h1>
-        <form method="GET">
-            <textarea cols="80" rows="15" name="query">{{ request.args.get('query', 'SELECT * WHERE {\n  ?uri a <https://schema.org/Movie> .\n  ?uri <https://schema.org/name> ?name .\n}\n\nLIMIT 100') }}</textarea>
-            <input type="submit"/>
+        <form class="ui form" method="GET">
+            <div class="field">
+                <label>Query</label>
+                <textarea name="query">{{ request.args.get('query', 'PREFIX schema:  <https://schema.org/>\n\nSELECT * WHERE {\n  ?uri a schema:Movie .\n  ?uri schema:name ?name .\n}\nLIMIT 10') }}</textarea>
+            </div>
+            <button class="ui button" type="submit">Submit</button>
         </form>
-        {% if result %}
-        <table>
+        # if result
+        <table class="ui celled table">
             <thead>
                 <tr>
-                {% for v in result.vars %}
-                    <td>{{ v }}</td>
-                {% endfor %}
+                # for v in result['head']['vars']
+                    <th>{{ v }}</th>
+                # endfor
                 </tr>
             </thead>
             <tbody>
-            {% for row in result %}
+            # for row in result['results']['bindings']
                 <tr>
-                {% for value in row %}
-                    <td>
-                        {% if value.startswith('http') %}
-                            <a href="{{ value }}">{{ value }}</a>
-                        {% else %}
-                            {{ value }}
-                        {% endif %}
-                    </td>
-                {% endfor %}
+                # for v in result['head']['vars']
+                    # if row[v]['type'] == 'uri'
+                    <td><a href="{{ row[v]['value'] }}">{{ row[v]['value'] }}</a></td>
+                    # else
+                    <td>{{ row[v]['value'] }}</td>
+                    # endif
+                # endfor
             </tr>
-            {% endfor %}
+            # endfor
             </tbody>
         </table>
-        {% endif %}
-{% endblock %}
+        # endif
+
+        # if ex
+        <div class="ui info message"><b>Error:</b> {{ ex }}</div>
+        # endif
+# endblock

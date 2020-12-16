@@ -9,97 +9,100 @@ from re import match,sub
 from os.path import join
 from contextlib import closing
 from rdflib import Graph,URIRef
+from urllib.parse import urlparse
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 config = yload(open(join(app.root_path, 'config.yml')).read(), Loader=FullLoader)
+app.jinja_env.line_statement_prefix = '#'
 extractors = {}
 cache = config.get('cache', False)
+base = config['base']
+store = None
+
+if config.get('store', False):
+    store = ConjunctiveGraph('Sleepycat')
+    store.open(config['store'], create=True)
+
 
 @app.route('/')
 def index():
-    host = request.headers.get('Host')
-    base  = config.get('base', 'http://' + host + '/')
-    title = config.get('title', base)
-
-    return render_template('index.html', host=host, base=base, title=title)
+    j = sparql('select ?class (count(?class) as ?count) where {?s a ?class } group by ?class order by DESC(?count)')
+ 
+    return render_template('index.html', counts=j, base=base)
 
 
 @app.route('/_sparql')
-def sparql():
-    result = None    
+def sparql_view():
+    result = None
     query = request.args.get('query', None)
 
     if query:
-        with closing(get_store()) as store:
-            result = store.query(query)
-            
-            return render_template('sparql.html', result=result, title='SPARQL')
+        try:
+            result = sparql(query)
+        except Exception as e:
+            return render_template('sparql.html', base=base, ex=e)
 
-    return render_template('sparql.html', result=None)
-
+    return render_template('sparql.html', result=result, base=base, title='SPARQL')
 
 
 @app.route('/<path:path>')
-def resource(path):
-    proto = request.headers.get('Protocol', 'http')
-    host = request.headers.get('Host')
-    base = config.get('base', f'{proto}://{host}/')
-    title = config.get('title', base)
-    uri, url, rdf = f'{base}{path}',None,None
+def resource_view(path):
+    j = get_json(f'{base}{path}')
+    related_map = { x['@id']:x for x in j.get('relation', []) }
 
-    rdf = get_resource(uri, path, base, '_reindex' not in request.args)
-
-    return render_template('resource.html', rdf=rdf, host=host, base=base, title=title) if rdf else ("Not found", 404)
+    return render_template('resource.html', rdf=j, related_map=related_map, base=base) if j else ("Not found", 404)
 
 
 @app.route('/<path:path>.ttl')
-def turtle(path):
-    proto = request.headers.get('Protocol', 'http')
-    host = request.headers.get('Host')
-    base = config.get('base', f'{proto}://{host}/')
-    uri, url,rdf = f'{base}{path}',None,None
-
-    rdf = get_resource(uri, path, base, '_reindex' not in request.args)
+def turtle_view(path):
+    rdf = get_triples(f'{base}{path}')
 
     return Response(rdf.serialize(format="turtle").decode("utf-8"), mimetype='text/turtle') if rdf else ("Not found", 404)
 
 
 @app.route('/<path:path>.jsonld')
-def jsonld(path):
-    proto = request.headers.get('Protocol', 'http')
-    host = request.headers.get('Host')
-    base = config.get('base', f'{proto}://{host}/')
-    uri, url,rdf = f'{base}{path}',None,None
+def jsonld_view(path):
+    j = get_json(f'{base}{path}')
 
-    rdf = get_resource(uri, path, base, '_reindex' not in request.args)
-    context = {"@vocab": "https://schema.org/" }
-    j = loads(rdf.serialize(format="json-ld", context=context).decode("utf-8"))
-
-    j = frame_hack(j, uri)
-
-    print(j)
-
-    return Response(dumps(j, indent=2), mimetype='application/json') if rdf else ("Not found", 404)
+    return Response(dumps(j, indent=2), mimetype='application/json') if j else ("Not found", 404)
 
 
-def get_resource(uri, path, base, use_cache=True):
-    if cache and use_cache:
-        with closing(get_store()) as store:
-            ctx = store.get_context(uri)
-            
-            if ctx:
-                # There has to be a better way
-                g = Graph()
-                g.namespace_manager.bind('schema', URIRef('https://schema.org/'))
-                for t in ctx:
-                    g.add(t)
+def sparql(query):
+    return loads(store.query(query).serialize(format='json').decode('utf-8'))
+    
 
-                return g
-                #return Graph().parse(data=ctx.serialize())
+def get_json(uri):
+    rdf = get_triples(uri)
+
+    if rdf:
+        context = {"@vocab": "https://schema.org/", "relation": "http://purl.org/dc/terms/relation" }
+        j = loads(rdf.serialize(format="json-ld", context=context).decode("utf-8"))
+
+        return frame_hack(j, uri)
+
+    return None
+
+
+def get_triples(uri):
+    rdf = None
+
+    if cache:
+        ctx = store.get_context(uri)
+        
+        if ctx:
+            # There has to be a better way!
+            g = Graph()
+            g.namespace_manager.bind('schema', URIRef('https://schema.org/'))
+            for t in ctx:
+                g.add(t)
+
+            return g
+
+    url_parts = urlparse(uri)
 
     for u in config.get('urls', []):
-        m = match(u['match'], path)
+        m = match(u['match'], url_parts.path[1:])
 
         # find target URL
         if m:
@@ -111,10 +114,9 @@ def get_resource(uri, path, base, use_cache=True):
                 rdf = extractor(url, uri, config=u.get('config', {}), base=base)
                 break
 
-    if rdf:
-        with closing(get_store()) as store:
-            for t in rdf:
-                store.add((t[0], t[1], t[2], uri))
+    if rdf and cache:
+        for t in rdf:
+            store.add((t[0], t[1], t[2], uri))
 
     return rdf
 
@@ -122,15 +124,6 @@ def get_resource(uri, path, base, use_cache=True):
 @app.route('/favicon.ico')
 def favicon():
     return 'NO!',404
-
-
-def get_store():
-    store = ConjunctiveGraph('Sleepycat') if config.get('store', False) else None
-
-    if store != None:
-        store.open(config['store'], create=True)
-
-    return store
 
 
 def load_extractor(name):
@@ -149,7 +142,7 @@ def frame_hack(j, uri):
     ret = { '@context': j['@context'] }
     main = next((x for x in j['@graph'] if x['@id'] == uri), None)
     ret.update(main)
-    ret['http://purl.org/dc/terms/relation'] = [ x for x in j['@graph'] if x['@id'] != uri ]
+    ret['relation'] = [ x for x in j['@graph'] if x['@id'] != uri ]
 
     return ret
 

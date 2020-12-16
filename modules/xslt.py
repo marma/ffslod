@@ -23,8 +23,6 @@ def extract(url, uri, config={}, base=''):
                           url=etree.XSLT.strparam(url),
                           base=etree.XSLT.strparam(base)))
 
-            print(result)
-
             g = Graph(identifier=uri).parse(data=result)
 
             if len(g) > 0:
@@ -32,6 +30,7 @@ def extract(url, uri, config={}, base=''):
 
                 if url != uri:
                     g.add((URIRef(url), URIRef('https://schema.org/mainEntity'), URIRef(uri)))
+                    g.add((URIRef(url), URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), URIRef('https://schema.org/WebPage')))
 
                 return g
 

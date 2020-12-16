@@ -9,7 +9,7 @@ services:
         volumes:
             - .:/app:ro
             - data-volume:/data
-        command: /usr/local/bin/gunicorn -k gevent --reload --workers 5 --worker-connections 10 --access-logfile=- --pythonpath /app -b :5000 app:app
+        command: /usr/local/bin/gunicorn -k gevent --reload --workers 2 --worker-connections 5 --access-logfile=- --pythonpath /app -b :5000 app:app
 
     front:
         restart: always

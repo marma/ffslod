@@ -1,0 +1,2 @@
+select ?class (count(?class) as ?count) where {?s a ?class } group by ?class order by DESC(?count)
+
