@@ -31,6 +31,13 @@
             # endfor
             </tbody>
         </table>
+        # elif examples:
+        <h2>Examples</h2>
+        <ul>
+            # for example in examples
+            <li><a href="?query={{ (example['query']) | urlencode }}">{{ example['title'] }}</a></li>
+            # endfor
+        </ul>
         # endif
 
         # if ex

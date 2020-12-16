@@ -1,8 +1,9 @@
 # extends "base.html"
 # block content
-            <h1 class="ui header">FFSLOD Testbed</h1>
+        <h1 class="ui header">{{ title }}</h1>
+        {{ description | safe }}
 
-       # if counts:
+        # if counts['results']['bindings'] != [ {} ]:
         <table class="ui celled table">
             <thead>
                 <tr>
@@ -22,6 +23,8 @@
             # endfor
             </tbody>
         </table>
+        # else:
+        <div class="ui info message">{{ empty_message | safe | default(None) }} </div>        
         # endif
 
 # endblock

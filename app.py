@@ -28,8 +28,10 @@ if config.get('store', False):
 @app.route('/')
 def index():
     j = sparql('select ?class (count(?class) as ?count) where {?s a ?class } group by ?class order by DESC(?count)')
+
+    print(j)
  
-    return render_template('index.html', counts=j, base=base)
+    return render_template('index.html', counts=j, base=base, title=config.get('title', 'No title'), description=config.get('description', None), empty_message=config.get('empty_message', None))
 
 
 @app.route('/_sparql')
@@ -43,7 +45,7 @@ def sparql_view():
         except Exception as e:
             return render_template('sparql.html', base=base, ex=e)
 
-    return render_template('sparql.html', result=result, base=base, title='SPARQL')
+    return render_template('sparql.html', result=result, base=base, title='SPARQL', examples=config.get('sparql_examples', []))
 
 
 @app.route('/<path:path>')
@@ -122,7 +124,7 @@ def get_triples(uri):
                 rdf = extractor(url, uri, config=u.get('config', {}), base=base)
                 break
 
-    if rdf and store:
+    if rdf and store != None:
         for t in rdf:
             store.add((t[0], t[1], t[2], uri))
 
