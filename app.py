@@ -30,7 +30,7 @@ def index():
     j = sparql('select ?class (count(?class) as ?count) where {?s a ?class } group by ?class order by DESC(?count)')
 
     print(j)
- 
+
     return render_template('index.html', counts=j, base=base, title=config.get('title', 'No title'), description=config.get('description', None), empty_message=config.get('empty_message', None))
 
 
