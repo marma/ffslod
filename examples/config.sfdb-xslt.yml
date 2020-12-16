@@ -1,6 +1,6 @@
 ---
-base: https://id.svenskfilmdatabas.se/
-
+#base: https://id.svenskfilmdatabas.se/
+base: http://localhost:8080/
 cache: true
 
 store: /data/rdfstore

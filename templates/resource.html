@@ -1,9 +1,10 @@
 # extends "base.html"
 # block content
             <h1 class="ui header">{{ rdf['name'] }}</h1>
+            <span><a href="{{uri}}.xml">XML</a></span>, <span><a href="{{uri}}.ttl">TTL</span></span>, <span><a href="{{uri}}.jsonld">JSON-LD</a></span>
             <table class="ui table">
                 # for key in rdf:
-                #   if key not in [ 'relation', '@context' ]
+                #   if key not in [ 'relation', '@id', '@context' ]
                 <tr>
                     <td valign="top"><b>{{ key }}</b></td>
                     <td>
@@ -31,5 +32,29 @@
                 #   endif
                 # endfor
             </table>
+
+            <h2>Related</h2>
+            # for rrdf in rdf['relation']:
+            <table class="ui table">
+                # for key in rrdf:
+                #   if key not in [ ]:
+                <tr>
+                    <td width="20em" valign="top"><b>{{ key }}</b></td>
+                    <td>
+                    # if rrdf[key] is mapping and 'name' in rrdf[key]:
+                        <a href="{{ rrdf[key]['@id'] }}">{{ rrdf[key]['name'] }}</a>
+                    # elif rrdf[key] is mapping and '@id' in rrdf[key]:
+                        <a href="{{ rrdf[key]['@id'] }}">{{ rrdf[key]['@id'] }}</a>
+                    # elif key == '@id':
+                        <a href="{{ rrdf[key] }}">{{ rrdf[key] }}</a>
+                    # else:
+                        {{ rrdf[key] }}
+                    # endif
+                    </td>
+                </tr>
+                #   endif
+                # endfor
+            </table>
+        # endfor 
 # endblock
 

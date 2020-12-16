@@ -23,7 +23,7 @@
 
 		<xsl:for-each select="div[@class='page-header__meta']/*">
 			<xsl:choose>
-				<xsl:when test="@class='person__born'">
+				<xsl:when test="@class='person__born' and normalize-space(.) != ''">
 					<schema:birthDate><xsl:value-of select="."/></schema:birthDate>
 				</xsl:when>
 				<xsl:when test="@class='person__death'">

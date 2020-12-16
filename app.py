@@ -48,10 +48,11 @@ def sparql_view():
 
 @app.route('/<path:path>')
 def resource_view(path):
-    j = get_json(f'{base}{path}')
-    related_map = { x['@id']:x for x in j.get('relation', []) }
+    uri = f'{base}{path}'
+    j = get_json(uri)
+    related_map = { x['@id']:x for x in j.get('relation', []) } if j else {}
 
-    return render_template('resource.html', rdf=j, related_map=related_map, base=base) if j else ("Not found", 404)
+    return render_template('resource.html', uri=uri, rdf=j, related_map=related_map, base=base) if j else ("Not found", 404)
 
 
 @app.route('/<path:path>.ttl')
@@ -66,6 +67,13 @@ def jsonld_view(path):
     j = get_json(f'{base}{path}')
 
     return Response(dumps(j, indent=2), mimetype='application/json') if j else ("Not found", 404)
+
+
+@app.route('/<path:path>.xml')
+def xml_view(path):
+    rdf = get_triples(f'{base}{path}')
+
+    return Response(rdf.serialize(format="xml").decode("utf-8"), mimetype='application/xml') if rdf else ("Not found", 404)
 
 
 def sparql(query):
@@ -114,7 +122,7 @@ def get_triples(uri):
                 rdf = extractor(url, uri, config=u.get('config', {}), base=base)
                 break
 
-    if rdf and cache:
+    if rdf and store:
         for t in rdf:
             store.add((t[0], t[1], t[2], uri))
 
@@ -145,16 +153,5 @@ def frame_hack(j, uri):
     ret['relation'] = [ x for x in j['@graph'] if x['@id'] != uri ]
 
     return ret
-
-
-
-
-
-
-
-
-
-
-
 
 

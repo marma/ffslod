@@ -4,7 +4,7 @@
         <form class="ui form" method="GET">
             <div class="field">
                 <label>Query</label>
-                <textarea name="query">{{ request.args.get('query', 'PREFIX schema:  <https://schema.org/>\n\nSELECT * WHERE {\n  ?uri a schema:Movie .\n  ?uri schema:name ?name .\n}\nLIMIT 10') }}</textarea>
+                <textarea name="query">{{ request.args.get('query', 'PREFIX schema:  <https://schema.org/>\n\nSELECT ?uri ?name WHERE {\n  ?uri a schema:Movie .\n  ?uri schema:name ?name .\n}\nLIMIT 10') }}</textarea>
             </div>
             <button class="ui button" type="submit">Submit</button>
         </form>
