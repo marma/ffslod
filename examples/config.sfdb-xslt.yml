@@ -2,14 +2,12 @@
 #base: https://id.svenskfilmdatabas.se/
 base: http://localhost:8080/
 cache: true
-
 store: /data/rdfstore
-
 sparql: true
 
 title: FFSLOD Testbed (Sfdb)
-
-description: 'This is a testbed for <a href="https://github.com/marma/ffslod">FFSLOD</a>, A dockerized tool to force Linked data and SPARQL support out of an obstructing site through a combination of RDFa, URL and content negotiation, or as a last attempt: a separate site for identifiers and parsing HTML with regexp. This particular instance is configured to mirror <a href="http://www.svenskfilmdatabas.se/">Svensk filmdatabas</a> and is being populated lazily, i.e when resurces are asked for e.g by clicking on links.'
+description: 'This is a testbed for <a href="https://github.com/marma/ffslod">FFSLOD</a>, A dockerized tool to coax Linked data and SPARQL support out of an obstructing site through a combination of RDFa, URL and content negotiation, or as a last attempt: a separate site for identifiers and parsing HTML with regexp. This particular instance is configured to mirror <a href="http://www.svenskfilmdatabas.se/">Svensk filmdatabas</a> and is being populated lazily, i.e when resurces are asked for e.g by clicking on links.'
+empty_message: '<b>Well, shit.</b> The database seem to be completely empty. Try <a href="/person/173874">this link</a> to add Mai Zetterling and explore from there.'
 
 sparql_examples:
     - title: All movies
