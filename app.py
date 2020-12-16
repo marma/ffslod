@@ -28,9 +28,7 @@ if config.get('store', False):
 @app.route('/')
 def index():
     j = sparql('select ?class (count(?class) as ?count) where {?s a ?class } group by ?class order by DESC(?count)')
-
-    print(j)
- 
+        
     return render_template('index.html', counts=j, base=base, title=config.get('title', 'No title'), description=config.get('description', None), empty_message=config.get('empty_message', None))
 
 
@@ -44,6 +42,9 @@ def sparql_view():
             result = sparql(query)
         except Exception as e:
             return render_template('sparql.html', base=base, ex=e)
+
+    if request.args.get('format', 'html') == 'json':
+        return Response(dumps(result, indent=2), mimetype='application/json')
 
     return render_template('sparql.html', result=result, base=base, title='SPARQL', examples=config.get('sparql_examples', []))
 
