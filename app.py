@@ -29,8 +29,6 @@ if config.get('store', False):
 def index():
     j = sparql('select ?class (count(?class) as ?count) where {?s a ?class } group by ?class order by DESC(?count)')
 
-    print(j)
-
     return render_template('index.html', counts=j, base=base, title=config.get('title', 'No title'), description=config.get('description', None), empty_message=config.get('empty_message', None))
 
 
@@ -45,6 +43,9 @@ def sparql_view():
         except Exception as e:
             return render_template('sparql.html', base=base, ex=e)
 
+    if request.args.get('format', 'html') == 'json':
+        return Response(dumps(result, indent=2), mimetype='application/json')
+
     return render_template('sparql.html', result=result, base=base, title='SPARQL', examples=config.get('sparql_examples', []))
 
 
@@ -54,7 +55,7 @@ def resource_view(path):
     j = get_json(uri)
     related_map = { x['@id']:x for x in j.get('relation', []) } if j else {}
 
-    return render_template('resource.html', uri=uri, rdf=j, related_map=related_map, base=base) if j else ("Not found", 404)
+    return render_template('resource.html', uri=uri, rdf=j, main_rdf={ k:v for k,v in j.items() if k != 'relation' }, related_map=related_map, base=base) if j else ("Not found", 404)
 
 
 @app.route('/<path:path>.ttl')
@@ -153,6 +154,21 @@ def frame_hack(j, uri):
     main = next((x for x in j['@graph'] if x['@id'] == uri), None)
     ret.update(main)
     ret['relation'] = [ x for x in j['@graph'] if x['@id'] != uri ]
+
+    rel_map = { x['@id']:x for x in ret['relation'] }
+
+    d=set()
+    for key,value in ret.items():
+        if isinstance(value, dict) and '@id' in value and value['@id'] in rel_map:
+            value.update(rel_map[value['@id']])
+            d.add(value['@id'])
+        elif isinstance(value, list):
+            for v in value:
+                if isinstance(v, dict) and '@id' in v and v['@id'] in rel_map:
+                    v.update(rel_map[v['@id']])
+                    d.add(v['@id'])
+
+    ret['relation'] = [ x for x in rel_map.values() if x['@id'] not in d ]
 
     return ret
 

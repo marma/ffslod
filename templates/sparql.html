@@ -31,6 +31,7 @@
             # endfor
             </tbody>
         </table>
+        <a href="?query={{ request.args.get('query') | urlencode }}&format=json">JSON</a>
         # elif examples:
         <h2>Examples</h2>
         <ul>

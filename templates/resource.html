@@ -9,7 +9,7 @@
                     <td valign="top"><b>{{ key }}</b></td>
                     <td>
                     # if rdf[key] is mapping:
-                    <a href="{{ rdf[key]['@id'] }}">{{ related_map[rdf[key]['@id']].get('name', 'Unknown') }}</a>
+                        <a href="{{ rdf[key]['@id'] }}">{{ rdf[key].get('name', 'Link') }}</a>
                     # elif rdf[key] is string:
                         {{ rdf[key] }}
                     # elif rdf[key] is iterable:
@@ -17,7 +17,7 @@
                         #   for x in rdf[key]:
                         <li>
                         #     if x is mapping:
-                            <a href="{{ x['@id'] }}">{{ related_map[x['@id']].get('name', 'Unknown') }}</a>
+                            <a href="{{ x['@id'] }}">{{ x.get('name', 'Link') }}</a>
                         #     else:
                             {{ x }}
                         #     endif

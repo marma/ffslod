@@ -10,6 +10,7 @@
 			    <xsl:apply-templates select="//h2[@id='crew']"/>
 			    <xsl:apply-templates select="//h2[@id='cast']"/>
                 <xsl:apply-templates select="//h2[@id='plot-summary']"/>
+                <xsl:apply-templates select="//div[@class='slider slider--gallery']"/>
             </rdf:Description>
 		</rdf:RDF>
 	</xsl:template>
@@ -92,6 +93,12 @@
                     <schema:name><xsl:value-of select="td"/></schema:name>
                 </rdf:Description>
             </schema:actor>
+        </xsl:for-each>
+    </xsl:template>
+
+    <xsl:template match="div[@class='slider slider--gallery']">
+        <xsl:for-each select="div[@class='slider__frame']/ul[@class='slider__slides']/li[position()=1]">
+            <schema:image resource="{a/@href}"/>
         </xsl:for-each>
     </xsl:template>
 
