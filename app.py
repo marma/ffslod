@@ -162,7 +162,7 @@ def frame_hack(j, uri):
         if isinstance(value, dict) and '@id' in value and value['@id'] in rel_map:
             value.update(rel_map[value['@id']])
             d.add(value['@id'])
-        elif isinstance(value, list):
+        elif isinstance(value, list) and key != 'relation':
             for v in value:
                 if isinstance(v, dict) and '@id' in v and v['@id'] in rel_map:
                     v.update(rel_map[v['@id']])
