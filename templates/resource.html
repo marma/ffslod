@@ -3,10 +3,16 @@
             <h1 class="ui header">{{ rdf['name'] }}</h1>
             <span><a href="{{uri}}.xml">XML</a></span>, <span><a href="{{uri}}.ttl">TTL</span></span>, <span><a href="{{uri}}.jsonld">JSON-LD</a></span>
             <table class="ui table">
+                <thead>
+                    <tr>
+                        <th>property</th>
+                        <th>value</th>
+                    </tr>
+                </thead>
                 # for key in rdf:
                 #   if key not in [ 'relation', '@id', '@context' ]
                 <tr>
-                    <td valign="top"><b>{{ key }}</b></td>
+                    <td widht="20%" valign="top"><b>{{ key }}</b></td>
                     <td>
                     # if rdf[key] is mapping:
                         <a href="{{ rdf[key]['@id'] }}">{{ rdf[key].get('name', 'Link') }}</a>
@@ -14,7 +20,7 @@
                         {{ rdf[key] }}
                     # elif rdf[key] is iterable:
                         <ul>
-                        #   for x in rdf[key]:
+                        #   for x in rdf[key] | sort(attribute='name'):
                         <li>
                         #     if x is mapping:
                             <a href="{{ x['@id'] }}">{{ x.get('name', 'Link') }}</a>
@@ -33,9 +39,16 @@
                 # endfor
             </table>
 
+            # if rdf.get('relation', None):
             <h2>Related</h2>
             # for rrdf in rdf['relation']:
             <table class="ui table">
+                <thead>
+                    <tr>
+                        <th>property</th>
+                        <th>value</th>
+                    </tr>
+                </thead>
                 # for key in rrdf:
                 #   if key not in [ ]:
                 <tr>
@@ -56,5 +69,6 @@
                 # endfor
             </table>
         # endfor 
+        # endif
 # endblock
 
