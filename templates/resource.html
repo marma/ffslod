@@ -2,7 +2,7 @@
 # block content
             <h1 class="ui header">{{ rdf['name'] }}</h1>
             <span><a href="{{uri}}.xml">XML</a></span>, <span><a href="{{uri}}.ttl">TTL</span></span>, <span><a href="{{uri}}.jsonld">JSON-LD</a></span>
-            <table class="ui table">
+            <table class="ui celled table">
                 <thead>
                     <tr>
                         <th>property</th>
@@ -42,7 +42,7 @@
             # if rdf.get('relation', None):
             <h2>Related</h2>
             # for rrdf in rdf['relation']:
-            <table class="ui table">
+            <table class="ui celled table">
                 <thead>
                     <tr>
                         <th>property</th>

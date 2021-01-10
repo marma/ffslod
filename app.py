@@ -173,3 +173,9 @@ def frame_hack(j, uri):
     return ret
 
 
+#@app.teardown_appcontext
+#def teardown_db(exception):
+#    if store:
+#        print('Closing store ...')
+#        store.close()
+
