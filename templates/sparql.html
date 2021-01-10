@@ -9,7 +9,7 @@
             <button class="ui button" type="submit">Submit</button>
         </form>
         # if result
-        <table class="ui celled table">
+        <table class="ui padded celled table">
             <thead>
                 <tr>
                 # for v in result['head']['vars']
@@ -30,6 +30,21 @@
             </tr>
             # endfor
             </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="2">
+                        <div class="ui right floated pagination menu">
+                            <a href="#" class="icon item">
+                                <i class="left chevron icon"></i>
+                            </a>
+                            <a class="item">x</i>
+                            <a href="#" class="icon item">
+                                <i class="right chevron icon"></i>
+                            </a>
+                        </div>
+                    </th>
+                </tr>
+            </tfoot>
         </table>
         <a href="?query={{ request.args.get('query') | urlencode }}&format=json">JSON</a>
         # elif examples:
