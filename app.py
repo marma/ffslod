@@ -27,7 +27,7 @@ if config.get('store', False):
 
 @app.route('/')
 def index():
-    j = sparql('select ?class (count(?class) as ?count) where {?s a ?class } group by ?class order by DESC(?count)')
+    j = sparql('select ?class (count(?class) as ?count) where { ?s a ?class } group by ?class order by DESC(?count)')
 
     return render_template('index.html', counts=j, base=base, title=config.get('title', 'No title'), description=config.get('description', None), empty_message=config.get('empty_message', None))
 
@@ -36,17 +36,43 @@ def index():
 def sparql_view():
     result = None
     query = request.args.get('query', None)
+    limit = request.args.get('limit', None)
+    offset = request.args.get('offset', None)
 
     if query:
+        q = query
+
+        if 'LIMIT' not in query:
+            if limit == None:
+                limit = 25
+
+            q += f' LIMIT {limit} '
+
+        if 'OFFSET' not in query:
+            if offset == None:
+                offset = 0
+
+            q += f' OFFSET {offset} '
+
+        print(q)
+
         try:
-            result = sparql(query)
+            result = sparql(q)
         except Exception as e:
             return render_template('sparql.html', base=base, ex=e)
 
     if request.args.get('format', 'html') == 'json':
         return Response(dumps(result, indent=2), mimetype='application/json')
 
-    return render_template('sparql.html', result=result, base=base, title='SPARQL', examples=config.get('sparql_examples', []))
+    return render_template(
+                'sparql.html',
+                result=result,
+                base=base,
+                title='SPARQL',
+                query=query,
+                limit=limit,
+                offset=offset,
+                examples=config.get('sparql_examples', []))
 
 
 @app.route('/<path:path>')
@@ -175,7 +201,7 @@ def frame_hack(j, uri):
 
 #@app.teardown_appcontext
 #def teardown_db(exception):
-#    if store:
+#    if store != None:
 #        print('Closing store ...')
 #        store.close()
 
