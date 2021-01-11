@@ -1,7 +1,6 @@
 ---
-#base: https://id.svenskfilmdatabas.se/
-base: http://localhost:8080/
-cache: true
+base: https://id.svenskfilmdatabas.se/
+cache: false
 store: /data/rdfstore
 sparql: true
 
@@ -16,8 +15,7 @@ sparql_examples:
 SELECT ?uri ?name WHERE {\n
   ?uri a schema:Movie .\n
   ?uri schema:name ?name .\n
-}\n
-LIMIT 10"
+}"
 
     - title: All movies starring Cary Elwes
       query: "PREFIX schema:  <https://schema.org/>\n
@@ -26,8 +24,7 @@ SELECT ?movie ?title WHERE {\n
   ?actor schema:name \"Cary Elwes\" .\n
   ?movie schema:actor ?actor .\n
   ?movie schema:name ?title .\n
-}
-LIMIT 10"
+}"
 
     - title: directors that worked with actors that worked with Mai Zetterling
       query: "PREFIX schema:  <https://schema.org/>\n
@@ -40,8 +37,7 @@ SELECT distinct ?director ?name WHERE {\n
   ?movie2 schema:actor ?actor .\n
   ?movie2 schema:director ?director .\n
   ?director schema:name ?name .\n
-}\n
-LIMIT 100"
+}\n"
 
 urls:
   - match: "person/(?P<id>[0-9]+)"

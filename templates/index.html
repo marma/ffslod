@@ -16,7 +16,7 @@
             # for row in counts['results']['bindings']
             #   if row['class']['value'] != 'https://schema.org/WebPage':
                 <tr>
-                    <td><a href="/_sparql?query={{ ('PREFIX schema:  <https://schema.org/>\n\nSELECT ?uri ?name WHERE {\n  ?uri a <' + row['class']['value'] +'> .\n  ?uri schema:name ?name .\n} LIMIT 25') | urlencode }}">{{ row['class']['value'] }}</a></td>
+                    <td><a href="/_sparql?query={{ ('PREFIX schema:  <https://schema.org/>\n\nSELECT ?uri ?name WHERE {\n  ?uri a <' + row['class']['value'] +'> .\n  ?uri schema:name ?name .\n}') | urlencode }}">{{ row['class']['value'] }}</a></td>
                     <td>{{ row['count']['value'] }}</td>
                 </tr>
             #   endif

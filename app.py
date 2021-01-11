@@ -44,7 +44,7 @@ def sparql_view():
 
         if 'LIMIT' not in query:
             if limit == None:
-                limit = 25
+                limit = 10
 
             q += f' LIMIT {limit} '
 
