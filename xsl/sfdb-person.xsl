@@ -5,7 +5,7 @@
     xmlns:schema="https://schema.org/"
     xmlns:dc="http://purl.org/dc/terms/">
     <xsl:param name="uri"/>
-    <xsl:param name="base">https://id.svenskfilmdatabas.se</xsl:param>
+    <xsl:param name="base">http://id.svenskfilmdatabas.se</xsl:param>
 
     <xsl:template match="/">
 		<rdf:RDF>

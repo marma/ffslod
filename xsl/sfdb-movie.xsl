@@ -1,7 +1,7 @@
 <?xml version="1.0"?> 
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:schema="https://schema.org/">
     <xsl:param name="uri"/>
-    <xsl:param name="base">https://id.svenskfilmdatabas.se/</xsl:param>
+    <xsl:param name="base">http://id.svenskfilmdatabas.se/</xsl:param>
 
     <xsl:template match="/">
 		<rdf:RDF>

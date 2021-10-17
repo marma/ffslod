@@ -10,11 +10,15 @@ from os.path import join
 from contextlib import closing
 from rdflib import Graph,URIRef
 from urllib.parse import urlparse
+from flask_caching import Cache
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.config['CACHE_TYPE'] = 'SimpleCache'
+app.config['CACHE_DEFAULT_TIMEOUT'] = 300
 config = yload(open(join(app.root_path, 'config.yml')).read(), Loader=FullLoader)
 app.jinja_env.line_statement_prefix = '#'
+scache = Cache(app)
 extractors = {}
 cache = config.get('cache', False)
 base = config['base']
@@ -26,14 +30,20 @@ if config.get('store', False):
 
 
 @app.route('/')
+@scache.cached(timeout=300)
 def index():
-    j = sparql('select ?class (count(?class) as ?count) where { ?s a ?class } group by ?class order by DESC(?count)')
+    #j = sparql('select ?class (count(?class) as ?count) where { ?s a ?class } group by ?class order by DESC(?count)')
 
-    return render_template('index.html', counts=j, base=base, title=config.get('title', 'No title'), description=config.get('description', None), empty_message=config.get('empty_message', None))
+    return render_template('index.html', counts=[], base=base, title=config.get('title', 'No title'), description=config.get('description', None), empty_message=config.get('empty_message', None))
 
 
 @app.route('/_sparql')
 def sparql_view():
+    def wants_format(fmt):
+        accept = request.headers.get('Accept', 'text/html')
+
+        return any([ x.strip().startswith(fmt) for x in accept.split(',') ])
+
     result = None
     query = request.args.get('query', None)
     limit = request.args.get('limit', None)
@@ -57,16 +67,18 @@ def sparql_view():
         print(q)
 
         try:
-            result = sparql(q)
+            if wants_format('application/sparql-results+json') or request.args.get('format', 'html') == 'json':
+                return Response(dumps(loads(store.query(query).serialize(format='json').decode('utf-8')), indent=2), mimetype='application/json')
+            elif wants_format('application/sparql-results+xml') or request.args.get('format', 'html') == 'xml':
+                return Response(store.query(query).serialize(format='xml').decode('utf-8'), mimetype='text/xml')
+
+            result = store.query(q)
         except Exception as e:
             return render_template('sparql.html', base=base, ex=e)
 
-    if request.args.get('format', 'html') == 'json':
-        return Response(dumps(result, indent=2), mimetype='application/json')
-
     return render_template(
                 'sparql.html',
-                result=result,
+                result=loads(result.serialize(format='json').decode('utf-8')) if query else None,
                 base=base,
                 title='SPARQL',
                 query=query,
@@ -79,9 +91,9 @@ def sparql_view():
 def resource_view(path):
     uri = f'{base}{path}'
     j = get_json(uri)
-    related_map = { x['@id']:x for x in j.get('relation', []) } if j else {}
+    related_map = { x['@id']:x for x in j.get('@included', []) } if j else {}
 
-    return render_template('resource.html', uri=uri, rdf=j, main_rdf={ k:v for k,v in j.items() if k != 'relation' }, related_map=related_map, base=base) if j else ("Not found", 404)
+    return render_template('resource.html', uri=uri, rdf=j, main_rdf={ k:v for k,v in j.items() if k != '@included' }, related_map=related_map, base=base) if j else ("Not found", 404)
 
 
 @app.route('/<path:path>.ttl')
@@ -105,8 +117,8 @@ def xml_view(path):
     return Response(rdf.serialize(format="xml").decode("utf-8"), mimetype='application/xml') if rdf else ("Not found", 404)
 
 
-def sparql(query):
-    return loads(store.query(query).serialize(format='json').decode('utf-8'))
+def sparql(queryi, fmt='json'):
+    return loads(store.query(query).serialize(format=fmt).decode('utf-8'))
     
 
 def get_json(uri):
@@ -179,22 +191,22 @@ def frame_hack(j, uri):
     ret = { '@context': j['@context'] }
     main = next((x for x in j['@graph'] if x['@id'] == uri), None)
     ret.update(main)
-    ret['relation'] = [ x for x in j['@graph'] if x['@id'] != uri ]
+    ret['@included'] = [ x for x in j['@graph'] if x['@id'] != uri ]
 
-    rel_map = { x['@id']:x for x in ret['relation'] }
+    rel_map = { x['@id']:x for x in ret['@included'] }
 
     d=set()
     for key,value in ret.items():
         if isinstance(value, dict) and '@id' in value and value['@id'] in rel_map:
             value.update(rel_map[value['@id']])
             d.add(value['@id'])
-        elif isinstance(value, list) and key != 'relation':
+        elif isinstance(value, list) and key != '@included':
             for v in value:
                 if isinstance(v, dict) and '@id' in v and v['@id'] in rel_map:
                     v.update(rel_map[v['@id']])
                     d.add(v['@id'])
 
-    ret['relation'] = [ x for x in rel_map.values() if x['@id'] not in d ]
+    ret['@included'] = [ x for x in rel_map.values() if x['@id'] not in d ]
 
     return ret
 

@@ -10,7 +10,7 @@
                     </tr>
                 </thead>
                 # for key in rdf:
-                #   if key not in [ 'relation', '@id', '@context' ]
+                #   if key not in [ '@included', '@id', '@context' ]
                 <tr>
                     <td widht="20%" valign="top"><b>{{ key }}</b></td>
                     <td>
@@ -39,9 +39,9 @@
                 # endfor
             </table>
 
-            # if rdf.get('relation', None):
+            # if rdf.get('@included', None):
             <h2>Related</h2>
-            # for rrdf in rdf['relation']:
+            # for rrdf in rdf['@included']:
             <table class="ui celled table">
                 <thead>
                     <tr>
